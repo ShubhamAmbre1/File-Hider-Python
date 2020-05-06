@@ -3,59 +3,74 @@ import hashlib
 
 
 def dec(func):
-	def wrapper():
-		check_password = hashlib.sha256(input("Enter password : ").encode('ascii')).hexdigest()
-		if check_password == create_password:
-			return func()
-		else:
-			print("Invalid Password")
-			return wrapper()
-	return wrapper
+    def pass_checker():
+        conn = sqlite3.connect('fh.db')
+        c = conn.cursor()
+        c.execute("SELECT password FROM passw")
+        conn.commit()
+        check = c.fetchone()
+
+        check_password = hashlib.sha256(input("Enter password : ").encode('ascii')).hexdigest()
+        # check_password = input()
+        print(check[0],'\n', check_password)
+        if check_password == check[0]:
+            return func()
+        else:
+            print("Invalid Password")
+            return pass_checker()
+    return pass_checker
+
+
 
 def create_hider():
-	
-	path = input("""
-	****************************************
-	Enter path where you want to hide files
-	example : C:/Users/Pc/Desktop/
-	"Put '/' at the end"
-	: 
-		""")
-	global create_password
-	create_password = hashlib.sha256(input("Enter a password : ").encode('ascii')).hexdigest()
 
-	conn = sqlite3.connect('fh.db')
+    conn = sqlite3.connect('fh.db')
+    c = conn.cursor()
+    c.execute("""CREATE TABLE files(
+        file BLOB NOT NULL
+        )""")
+    conn.commit()
 
-	c = conn.cursor()
+    print("Hider Created")
 
-	c.execute("""CREATE TABLE files(
-		password text,
-		file BLOB NOT NULL
-		)""")
+    create_password = hashlib.sha256(input("Enter a password : ").encode('ascii')).hexdigest()
+    # create_password = input()
+    c.execute("CREATE TABLE passw(password TEXT)")   
+    conn.commit() 
 
-	conn.commit()
+    c.execute("INSERT INTO passw(password) VALUES(:passwo)",{'passwo': create_password})
+    conn.commit()
 
-	conn.close()
+    conn.close()
 
+
+
+@dec
 def add_file():
-	pass
+    print('Complete')
 
+@dec
 def remove_file():
-	pass
+    pass
 
+@dec
 def delete_hider():
-	pass
-
-
-
+    pass
 
 
 if __name__ == "__main__":
-	i = int(input("""
+#     path = input("""
+# ****************************************
+# Enter hider destination
+# example : C:/Users/Pc/Desktop/
+# "Put '/' at the end"
+# : """)
+
+    while True:
+        i = int(input("""
 ************************************
 
 1 = Create Hider
-2 = Open Hider
 2 = Add File
 3 = Remove File
 4 = Delete Hider
@@ -63,31 +78,27 @@ if __name__ == "__main__":
 
 ************************************
 = """))
-	while True:
-		if i == 1:
-			try:
-				create_hider()
-			except:
-				print("Already created")
-				continue
+    
+        if i == 1:
+            try:
+                create_hider()
+            except:
+                print("Already created!")
+        
+        elif i == 2:
+            add_file()
+            
+        elif i == 3:
+            try:
+                remove_file()
+            except:
+                print("No such file")
 
-		elif i == 2:
-			try:
-				add_file()
-			except:
-				print("Already exist")
-
-		elif i == 3:
-			try:
-				remove_file()
-			except:
-				print("No such file")
-
-		elif i == 4:
-			try:
-				delete_hider()
-			except:
-				print("No such Hider")
-		elif i == 5:
-			quit()
+        elif i == 4:
+            try:
+                delete_hider()
+            except:
+                print("No such Hider")
+        elif i == 5:
+            quit()
 
