@@ -4,7 +4,9 @@ import hashlib
 
 def dec(func):
     def pass_checker():
+        global conn
         conn = sqlite3.connect('fh.db')
+        global c
         c = conn.cursor()
         c.execute("SELECT password FROM passw")
         conn.commit()
@@ -12,7 +14,7 @@ def dec(func):
 
         check_password = hashlib.sha256(input("Enter password : ").encode('ascii')).hexdigest()
         # check_password = input()
-        print(check[0],'\n', check_password)
+        # print(check[0],'\n', check_password)
         if check_password == check[0]:
             return func()
         else:
@@ -27,6 +29,7 @@ def create_hider():
     conn = sqlite3.connect('fh.db')
     c = conn.cursor()
     c.execute("""CREATE TABLE files(
+        name TEXT,
         file BLOB NOT NULL
         )""")
     conn.commit()
@@ -47,11 +50,31 @@ def create_hider():
 
 @dec
 def add_file():
-    print('Complete')
+    file = input("Enter file path = ")
+
+    with open(file, 'rb') as f:
+        data = f.read()
+
+    c.execute("INSERT INTO files(name, file) VALUES(:name ,:file)",{'name':file, 'file': data})
+    print("File added.")
+
+    conn.commit()
+    conn.close()
+    
 
 @dec
 def remove_file():
-    pass
+    file = input("Enter the file = ")
+
+    c.execute("SELECT name,file FROM files WHERE file = (:file)",{'file': file})
+
+    content = c.fetchone()
+
+    with open("temp.jpg", 'wb') as f:
+        f.write(content[1])
+    conn.commit()
+    conn.close()
+
 
 @dec
 def delete_hider():
