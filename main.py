@@ -13,8 +13,6 @@ def dec(func):
         check = c.fetchone()
 
         check_password = hashlib.sha256(input("Enter password : ").encode('ascii')).hexdigest()
-        # check_password = input()
-        # print(check[0],'\n', check_password)
         if check_password == check[0]:
             return func()
         else:
@@ -37,7 +35,7 @@ def create_hider():
     print("Hider Created")
 
     create_password = hashlib.sha256(input("Enter a password : ").encode('ascii')).hexdigest()
-    # create_password = input()
+
     c.execute("CREATE TABLE passw(password TEXT)")   
     conn.commit() 
 
@@ -52,10 +50,11 @@ def create_hider():
 def add_file():
     file = input("Enter file path = ")
     lis = file.split("/") 
+    
     with open(file, 'rb') as f:
         data = f.read()
-    name = lis[len[lis]-1:][0]
-    c.execute("INSERT INTO files(name, file) VALUES(:name ,:file)",{'name':name, 'file': data})
+
+    c.execute("INSERT INTO files(name, file) VALUES(:name ,:file)",{'name':lis[len(lis)-1:][0], 'file': data})
     print("File added.")
 
     conn.commit()
@@ -64,14 +63,20 @@ def add_file():
 
 @dec
 def remove_file():
-    name = input("Enter the file = ")
+    name = input("Enter the file name = ")
 
     c.execute("SELECT name,file FROM files WHERE name = (:name)",{'name': name})
 
     content = c.fetchone()
-    print(content[0])
-    with open("temp.jpg", 'wb') as f:
+    # print(content[0])
+    with open(name, 'wb') as f:
         f.write(content[1])
+    conn.commit()
+
+    c.execute("DELETE FROM files WHERE name = (:name)", {'name': name})
+    conn.commit()
+    c.execute("VACUUM")
+    print(f"Removed {name}")
     conn.commit()
     conn.close()
 
