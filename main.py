@@ -51,11 +51,11 @@ def create_hider():
 @dec
 def add_file():
     file = input("Enter file path = ")
-
+    lis = file.split("/") 
     with open(file, 'rb') as f:
         data = f.read()
-
-    c.execute("INSERT INTO files(name, file) VALUES(:name ,:file)",{'name':file, 'file': data})
+    name = lis[len[lis]-1:][0]
+    c.execute("INSERT INTO files(name, file) VALUES(:name ,:file)",{'name':name, 'file': data})
     print("File added.")
 
     conn.commit()
@@ -64,12 +64,12 @@ def add_file():
 
 @dec
 def remove_file():
-    file = input("Enter the file = ")
+    name = input("Enter the file = ")
 
-    c.execute("SELECT name,file FROM files WHERE file = (:file)",{'file': file})
+    c.execute("SELECT name,file FROM files WHERE name = (:name)",{'name': name})
 
     content = c.fetchone()
-
+    print(content[0])
     with open("temp.jpg", 'wb') as f:
         f.write(content[1])
     conn.commit()
