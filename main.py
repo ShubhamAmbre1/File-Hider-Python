@@ -1,17 +1,15 @@
 import sqlite3
 import hashlib
-
+import os
 
 def dec(func):
     def pass_checker():
-        global conn
-        conn = sqlite3.connect('fh.db')
-        global c
+        global conn,c
+        conn = sqlite3.connect(path)
         c = conn.cursor()
         c.execute("SELECT password FROM passw")
         conn.commit()
         check = c.fetchone()
-
         check_password = hashlib.sha256(input("Enter password : ").encode('ascii')).hexdigest()
         if check_password == check[0]:
             return func()
@@ -21,10 +19,9 @@ def dec(func):
     return pass_checker
 
 
-
 def create_hider():
 
-    conn = sqlite3.connect('fh.db')
+    conn = sqlite3.connect(path)
     c = conn.cursor()
     c.execute("""CREATE TABLE files(
         name TEXT,
@@ -43,7 +40,6 @@ def create_hider():
     conn.commit()
 
     conn.close()
-
 
 
 @dec
@@ -68,7 +64,6 @@ def remove_file():
     c.execute("SELECT name,file FROM files WHERE name = (:name)",{'name': name})
 
     content = c.fetchone()
-    # print(content[0])
     with open(name, 'wb') as f:
         f.write(content[1])
     conn.commit()
@@ -83,17 +78,23 @@ def remove_file():
 
 @dec
 def delete_hider():
-    pass
+    conn.close()
+    path_list = path.split("/")
+    name = path_list[len(path_list)-1:][0]
+    print("{} will be deleted".format(name[:len(name)-3]))
+    x = input("""Are you sure?
+Y/N = """)
+
+    if x == 'y' or x == 'Y':
+        os.remove(path)
 
 
 if __name__ == "__main__":
-#     path = input("""
-# ****************************************
-# Enter hider destination
-# example : C:/Users/Pc/Desktop/
-# "Put '/' at the end"
-# : """)
-
+    path = input("""
+****************************************
+Enter hider destination and name
+example : C:/Users/Pc/Desktop/hider.db
+: """)
     while True:
         i = int(input("""
 ************************************
