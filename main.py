@@ -28,9 +28,7 @@ def create_hider():
         file BLOB NOT NULL
         )""")
     conn.commit()
-
-    print("Hider Created")
-
+    
     create_password = hashlib.sha256(input("Enter a password : ").encode('ascii')).hexdigest()
 
     c.execute("CREATE TABLE passw(password TEXT)")   
@@ -38,6 +36,8 @@ def create_hider():
 
     c.execute("INSERT INTO passw(password) VALUES(:passwo)",{'passwo': create_password})
     conn.commit()
+
+    print("Hider Created")
 
     conn.close()
 
